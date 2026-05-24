@@ -11,9 +11,10 @@ CREATE TABLE characteristic_templates (
     operation_type_id INTEGER NOT NULL REFERENCES operation_types(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     char_kind VARCHAR(20) NOT NULL CHECK (char_kind IN ('PARAMETER', 'ROLE')),
-    data_type VARCHAR(20) NOT NULL CHECK (data_type IN ('NUMBER', 'TEXT')),
+    data_type VARCHAR(20) NOT NULL CHECK (data_type IN ('NUMBER', 'TEXT', 'ENUM')),
     min_value NUMERIC(10,2),
-    max_value NUMERIC(10,2)
+    max_value NUMERIC(10,2),
+    allowed_values TEXT
 );
 
 -- 3. Реестр проведенных документов

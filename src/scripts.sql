@@ -1,4 +1,3 @@
--- Триггерная функция для проверки диапазонов значений
 CREATE OR REPLACE FUNCTION trg_check_characteristic_constraints()
     RETURNS TRIGGER AS $$
 DECLARE
@@ -6,14 +5,14 @@ DECLARE
     v_data_type VARCHAR;
     v_min NUMERIC;
     v_max NUMERIC;
+    v_allowed_values TEXT;
 BEGIN
-    -- Получаем правила из шаблона
-    SELECT char_kind, data_type, min_value, max_value
-    INTO v_char_kind, v_data_type, v_min, v_max
+    -- Получаем правила и список допустимых значений из шаблона
+    SELECT char_kind, data_type, min_value, max_value, allowed_values
+    INTO v_char_kind, v_data_type, v_min, v_max, v_allowed_values
     FROM characteristic_templates
     WHERE id = NEW.template_id;
 
-    -- Проверка для численных параметров
     IF v_char_kind = 'PARAMETER' AND v_data_type = 'NUMBER' THEN
         IF NEW.num_value IS NOT NULL THEN
             IF v_min IS NOT NULL AND NEW.num_value < v_min THEN
@@ -21,6 +20,17 @@ BEGIN
             END IF;
             IF v_max IS NOT NULL AND NEW.num_value > v_max THEN
                 RAISE EXCEPTION 'Значение % больше допустимого максимума (%)', NEW.num_value, v_max;
+            END IF;
+        END IF;
+    END IF;
+
+    IF v_data_type = 'ENUM' THEN
+        IF NEW.txt_value IS NOT NULL AND v_allowed_values IS NOT NULL THEN
+            -- Проверяем, входит ли введенный текст в массив допустимых значений
+            -- string_to_array разбивает строку 'Лагер,Пилснер' по запятой
+            IF NOT (NEW.txt_value = ANY(string_to_array(v_allowed_values, ','))) THEN
+                RAISE EXCEPTION 'Значение "%" не входит в список допустимых вариантов: (%)',
+                    NEW.txt_value, v_allowed_values;
             END IF;
         END IF;
     END IF;

@@ -27,7 +27,6 @@ SELECT add_characteristic_template(
 
 -- 3. Формирование экземпляров ХО
 -- Создаем документ варки (ожидаемый ID документа = 1)
--- ВАЖНО: В этот момент функция автоматически создаст пустые слоты для Температуры и Пивовара!
 SELECT create_business_operation(
     p_op_type_id := 1,
     p_doc_number := 'ВАРКА-001'::VARCHAR,
@@ -55,7 +54,7 @@ SELECT set_characteristic_value(
 SELECT add_operation_specification(1, 'Солод Пэйл Эль'::VARCHAR, 200.000::NUMERIC, 75.00::NUMERIC);
 SELECT add_operation_specification(1, 'Хмель Каскад'::VARCHAR, 5.000::NUMERIC, 1200.00::NUMERIC);
 
--- Пытаемся установить температуру 95 градусов (Должно вызвать ошибку!)
+-- Пытаемся установить температуру 95 градусов (Должно вызвать ошибку)
 SELECT set_characteristic_value(
     p_operation_id := 1,
     p_template_id := 1,
